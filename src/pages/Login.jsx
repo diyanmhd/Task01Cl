@@ -37,62 +37,92 @@ function Login() {
   }
 
   return (
-    <div className="container min-vh-100 d-flex align-items-center justify-content-center">
-      <div className="row w-100 justify-content-center">
-        <div className="col-md-4 col-sm-6">
-          <div className="card shadow-lg border-0">
-            <div className="card-body p-4">
-              <h3 className="text-center mb-2 fw-bold">Welcome Back</h3>
-              <p className="text-center text-muted mb-4">
-                Login to continue
-              </p>
+    <div
+      className="min-vh-100 d-flex align-items-center justify-content-center"
+      style={{
+        background: 'linear-gradient(135deg, #1e293b, #0f172a)'
+      }}
+    >
+      <div className="container">
+        <div className="row justify-content-center">
+          <div className="col-lg-4 col-md-6">
 
-              {error && (
-                <div className="alert alert-danger text-center">
-                  {error}
-                </div>
-              )}
+            <div className="card shadow-lg border-0 rounded-4">
 
-              <form onSubmit={handleSubmit}>
-                <div className="mb-3">
-                  <label className="form-label fw-semibold">Username</label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    placeholder="Enter username"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                    required
-                  />
+              <div className="card-body p-5">
+
+                <div className="text-center mb-4">
+                  <h3 className="fw-bold mb-2">Employee Portal</h3>
+                  <p className="text-muted mb-0">
+                    Sign in to your account
+                  </p>
                 </div>
 
-                <div className="mb-3">
-                  <label className="form-label fw-semibold">Password</label>
-                  <input
-                    type="password"
-                    className="form-control"
-                    placeholder="Enter password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                  />
+                {error && (
+                  <div className="alert alert-danger text-center small">
+                    {error}
+                  </div>
+                )}
+
+                <form onSubmit={handleSubmit}>
+
+                  <div className="mb-4">
+                    <label className="form-label fw-semibold">
+                      Username
+                    </label>
+                    <input
+                      type="text"
+                      className="form-control form-control-lg"
+                      placeholder="Enter your username"
+                      value={username}
+                      onChange={(e) => setUsername(e.target.value)}
+                      required
+                    />
+                  </div>
+
+                  <div className="mb-4">
+                    <label className="form-label fw-semibold">
+                      Password
+                    </label>
+                    <input
+                      type="password"
+                      className="form-control form-control-lg"
+                      placeholder="Enter your password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                    />
+                  </div>
+
+                  <button
+                    type="submit"
+                    className="btn btn-primary btn-lg w-100 fw-semibold rounded-3"
+                  >
+                    Login
+                  </button>
+
+                </form>
+
+                <div className="text-center mt-4">
+                  <span className="text-muted small">
+                    Don’t have an account?
+                  </span>{' '}
+                  <Link
+                    to="/register"
+                    className="fw-semibold text-decoration-none"
+                  >
+                    Register
+                  </Link>
                 </div>
 
-                <button
-                  type="submit"
-                  className="btn btn-primary w-100 fw-semibold"
-                >
-                  Login
-                </button>
-              </form>
-
-              <div className="text-center mt-3">
-                <span className="text-muted">Don’t have an account? </span>
-                <Link to="/register" className="fw-semibold">
-                  Register
-                </Link>
               </div>
+
             </div>
+
+            <div className="text-center text-light small mt-4">
+              © {new Date().getFullYear()} Employee Management System
+            </div>
+
           </div>
         </div>
       </div>

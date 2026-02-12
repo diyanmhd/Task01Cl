@@ -5,6 +5,7 @@ import {
   updateEmployeeProfile
 } from '../services/employeeService'
 import { getLoggedInUser, logout } from '../utils/auth'
+import 'bootstrap/dist/css/bootstrap.min.css'
 
 function EmployeeDashboard() {
   const navigate = useNavigate()
@@ -12,6 +13,10 @@ function EmployeeDashboard() {
   const [formData, setFormData] = useState(null)
   const [isEditing, setIsEditing] = useState(false)
   const [loading, setLoading] = useState(true)
+
+  const [toastMessage, setToastMessage] = useState('')
+  const [toastType, setToastType] = useState('success')
+  const [showToast, setShowToast] = useState(false)
 
   useEffect(() => {
     const user = getLoggedInUser()
@@ -29,12 +34,21 @@ function EmployeeDashboard() {
     fetchProfile(user.userId)
   }, [navigate])
 
+  const showNotification = (message, type = 'success') => {
+    setToastMessage(message)
+    setToastType(type)
+    setShowToast(true)
+
+    setTimeout(() => {
+      setShowToast(false)
+    }, 3500)
+  }
+
   const fetchProfile = async (userId) => {
     try {
       const res = await getEmployeeProfile(userId)
       setProfile(res.data)
 
-      // ⬇️ ONLY editable fields
       setFormData({
         designation: res.data.designation || '',
         department: res.data.department || '',
@@ -42,7 +56,7 @@ function EmployeeDashboard() {
         skillset: res.data.skillset || ''
       })
     } catch {
-      alert('Failed to load profile')
+      showNotification('Failed to load profile', 'danger')
     } finally {
       setLoading(false)
     }
@@ -55,20 +69,12 @@ function EmployeeDashboard() {
 
   const handleUpdate = async () => {
     try {
-      // ⬇️ DTO-MATCHING PAYLOAD
-      await updateEmployeeProfile(profile.id, {
-        designation: formData.designation,
-        department: formData.department,
-        address: formData.address,
-        skillset: formData.skillset
-      })
-
-      alert('Profile updated successfully')
+      await updateEmployeeProfile(profile.id, formData)
+      showNotification('Profile updated successfully!', 'success')
       setIsEditing(false)
       fetchProfile(profile.id)
-    } catch (err) {
-      console.error(err)
-      alert('Update failed')
+    } catch {
+      showNotification('Update failed', 'danger')
     }
   }
 
@@ -77,47 +83,115 @@ function EmployeeDashboard() {
     navigate('/login')
   }
 
-  if (loading) return <div className="text-center mt-5">Loading...</div>
+  if (loading) {
+    return (
+      <div className="d-flex justify-content-center align-items-center vh-100">
+        <div className="spinner-border text-primary"></div>
+      </div>
+    )
+  }
 
   return (
-    <div className="container mt-5">
-      <div className="card shadow-sm p-4">
+    <div className="container-fluid bg-light min-vh-100 py-4 px-5">
 
-        {/* Header */}
-        <div className="d-flex justify-content-between align-items-center">
-          <h3 className="mb-0">Employee Dashboard</h3>
-          <button className="btn btn-outline-danger btn-sm" onClick={handleLogout}>
+      <div className="card shadow-sm border-0 rounded-3">
+
+        <div className="card-header bg-dark text-white d-flex justify-content-between align-items-center px-4 py-3">
+          <h4 className="mb-0 fw-semibold">Employee Dashboard</h4>
+          <button
+            className="btn btn-outline-light btn-sm"
+            onClick={handleLogout}
+          >
             Logout
           </button>
         </div>
 
-        <hr />
+        <div className="card-body px-5 py-4">
 
-        {!isEditing ? (
-          <>
-            <div className="mb-3">
-              <p><b>Name:</b> {profile.name}</p>
-              <p><b>Email:</b> {profile.email}</p>
-              <p><b>Department:</b> {profile.department}</p>
-              <p><b>Designation:</b> {profile.designation}</p>
-              <p><b>Address:</b> {profile.address}</p>
-              <p><b>Joining Date:</b> {profile.joiningDate}</p>
-              <p><b>Skillset:</b> {profile.skillset}</p>
+          {!isEditing ? (
+            <div className="row align-items-start">
+
+              <div className="col-lg-3 border-end text-center pe-4">
+                <img
+                  src={
+                    profile.photo
+                      ? `data:image/*;base64,${profile.photo}`
+                      : 'https://via.placeholder.com/150'
+                  }
+                  alt="Profile"
+                  className="rounded-circle shadow-sm mb-3"
+                  style={{
+                    width: '150px',
+                    height: '150px',
+                    objectFit: 'cover',
+                    border: '4px solid #dee2e6'
+                  }}
+                />
+
+                <h5 className="fw-bold mb-1">{profile.name}</h5>
+                <p className="text-muted small mb-2">{profile.email}</p>
+
+                <span className="badge bg-primary px-3 py-2">
+                  {profile.designation}
+                </span>
+              </div>
+
+              <div className="col-lg-9 ps-5">
+
+                <div className="d-flex justify-content-between align-items-center mb-4">
+                  <h5 className="fw-semibold mb-0">Professional Information</h5>
+                  <button
+                    className="btn btn-primary btn-sm"
+                    onClick={() => setIsEditing(true)}
+                  >
+                    Edit Profile
+                  </button>
+                </div>
+
+                <hr />
+
+                <div className="row mt-4">
+                  <div className="col-md-6 mb-4">
+                    <label className="text-muted small">Department</label>
+                    <p className="fw-semibold">{profile.department}</p>
+                  </div>
+
+                  <div className="col-md-6 mb-4">
+                    <label className="text-muted small">Joining Date</label>
+                    <p className="fw-semibold">
+                      {profile.joiningDate?.split('T')[0]}
+                    </p>
+                  </div>
+
+                  <div className="col-md-12 mb-4">
+                    <label className="text-muted small">Address</label>
+                    <p className="fw-semibold">{profile.address}</p>
+                  </div>
+
+                  <div className="col-md-12">
+                    <label className="text-muted small">Skillset</label>
+                    <div className="mt-2">
+                      {profile.skillset?.split(',').map((skill, index) => (
+                        <span
+                          key={index}
+                          className="badge bg-secondary me-2 mb-2 px-3 py-2"
+                        >
+                          {skill.trim()}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+
             </div>
-
-            <button className="btn btn-primary" onClick={() => setIsEditing(true)}>
-              Edit Profile
-            </button>
-          </>
-        ) : (
-          <>
-            {/* Edit Section */}
-            <div className="bg-light rounded p-3 mb-3">
-              <h5 className="mb-3 fw-semibold">Edit Profile</h5>
+          ) : (
+            <>
+              <h5 className="fw-semibold mb-4">Edit Profile</h5>
 
               <div className="row">
-
-                <div className="col-md-6 mb-3">
+                <div className="col-md-6 mb-4">
                   <label className="form-label">Department</label>
                   <input
                     className="form-control"
@@ -127,7 +201,7 @@ function EmployeeDashboard() {
                   />
                 </div>
 
-                <div className="col-md-6 mb-3">
+                <div className="col-md-6 mb-4">
                   <label className="form-label">Designation</label>
                   <input
                     className="form-control"
@@ -137,8 +211,10 @@ function EmployeeDashboard() {
                   />
                 </div>
 
-                <div className="col-md-6 mb-3">
-                  <label className="form-label">Skillset</label>
+                <div className="col-md-6 mb-4">
+                  <label className="form-label">
+                    Skillset (comma separated)
+                  </label>
                   <input
                     className="form-control"
                     name="skillset"
@@ -147,7 +223,7 @@ function EmployeeDashboard() {
                   />
                 </div>
 
-                <div className="col-md-12 mb-3">
+                <div className="col-md-12 mb-4">
                   <label className="form-label">Address</label>
                   <input
                     className="form-control"
@@ -157,22 +233,51 @@ function EmployeeDashboard() {
                   />
                 </div>
               </div>
-            </div>
 
-            <div className="d-flex justify-content-end gap-2">
-              <button className="btn btn-success" onClick={handleUpdate}>
-                Save Changes
-              </button>
-              <button
-                className="btn btn-outline-secondary"
-                onClick={() => setIsEditing(false)}
-              >
-                Cancel
-              </button>
-            </div>
-          </>
-        )}
+              <div className="text-end">
+                <button
+                  className="btn btn-success me-2"
+                  onClick={handleUpdate}
+                >
+                  Save Changes
+                </button>
+                <button
+                  className="btn btn-outline-secondary"
+                  onClick={() => setIsEditing(false)}
+                >
+                  Cancel
+                </button>
+              </div>
+            </>
+          )}
+
+        </div>
       </div>
+
+      {/* PROFESSIONAL TOP RIGHT TOAST */}
+      {showToast && (
+        <div className="position-fixed top-0 end-0 p-4" style={{ zIndex: 9999 }}>
+          <div
+            className={`toast show shadow-lg border-0`}
+            style={{ minWidth: '360px' }}
+          >
+            <div
+              className={`toast-header text-white bg-${toastType}`}
+            >
+              <strong className="me-auto fs-6">Notification</strong>
+              <button
+                type="button"
+                className="btn-close btn-close-white"
+                onClick={() => setShowToast(false)}
+              ></button>
+            </div>
+            <div className="toast-body fs-6 py-3">
+              {toastMessage}
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   )
 }
