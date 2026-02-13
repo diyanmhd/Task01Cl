@@ -11,3 +11,9 @@ export const getEmployeeProfile = (userId) => {
 export const updateEmployeeProfile = (id, data) => {
   return axios.put(`${BASE_URL}/${id}`, data)
 }
+
+export const updateEmployeePhoto = (id, formData) => {
+  return axios.put(`${BASE_URL}/${id}/photo`, formData, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  })
+}

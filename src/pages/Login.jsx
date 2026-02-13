@@ -23,16 +23,25 @@ function Login() {
         loginData
       )
 
+      // Save user in localStorage
       localStorage.setItem('user', JSON.stringify(response.data))
 
-      if (response.data.role === 'admin') {
+      // ✅ Fix: Use Role (capital R) from backend
+      if (response.data.Role?.toLowerCase() === 'admin') {
         navigate('/admin')
       } else {
         navigate('/employee')
       }
+
     } catch (err) {
       console.error(err)
-      setError('Invalid username or password')
+
+      // ✅ Show backend message properly
+      if (err.response && err.response.data) {
+        setError(err.response.data)
+      } else {
+        setError('Login failed. Please try again.')
+      }
     }
   }
 

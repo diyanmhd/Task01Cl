@@ -2,7 +2,8 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   getEmployeeProfile,
-  updateEmployeeProfile
+  updateEmployeeProfile,
+  updateEmployeePhoto
 } from '../services/employeeService'
 import { getLoggedInUser, logout } from '../utils/auth'
 import 'bootstrap/dist/css/bootstrap.min.css'
@@ -11,6 +12,7 @@ function EmployeeDashboard() {
   const navigate = useNavigate()
   const [profile, setProfile] = useState(null)
   const [formData, setFormData] = useState(null)
+  const [selectedPhoto, setSelectedPhoto] = useState(null)
   const [isEditing, setIsEditing] = useState(false)
   const [loading, setLoading] = useState(true)
 
@@ -78,6 +80,43 @@ function EmployeeDashboard() {
     }
   }
 
+  // PHOTO HANDLERS
+  const handlePhotoChange = (e) => {
+    setSelectedPhoto(e.target.files[0])
+  }
+
+  const handlePhotoUpload = async () => {
+    if (!selectedPhoto) {
+      showNotification('Please select a photo', 'danger')
+      return
+    }
+
+    try {
+      const form = new FormData()
+      form.append('photo', selectedPhoto)
+
+      await updateEmployeePhoto(profile.id, form)
+
+      showNotification('Photo updated successfully!', 'success')
+      fetchProfile(profile.id)
+      setSelectedPhoto(null)
+    } catch {
+      showNotification('Photo update failed', 'danger')
+    }
+  }
+
+  const handleRemovePhoto = async () => {
+    try {
+      const form = new FormData()
+      await updateEmployeePhoto(profile.id, form)
+
+      showNotification('Photo removed successfully!', 'success')
+      fetchProfile(profile.id)
+    } catch {
+      showNotification('Failed to remove photo', 'danger')
+    }
+  }
+
   const handleLogout = () => {
     logout()
     navigate('/login')
@@ -112,21 +151,36 @@ function EmployeeDashboard() {
             <div className="row align-items-start">
 
               <div className="col-lg-3 border-end text-center pe-4">
-                <img
-                  src={
-                    profile.photo
-                      ? `data:image/*;base64,${profile.photo}`
-                      : 'https://via.placeholder.com/150'
-                  }
-                  alt="Profile"
-                  className="rounded-circle shadow-sm mb-3"
-                  style={{
-                    width: '150px',
-                    height: '150px',
-                    objectFit: 'cover',
-                    border: '4px solid #dee2e6'
-                  }}
-                />
+
+                {/* SHOW PHOTO ONLY IF EXISTS */}
+                {profile.photo ? (
+                  <img
+                    src={`data:image/*;base64,${profile.photo}`}
+                    alt="Profile"
+                    className="rounded-circle shadow-sm mb-3"
+                    style={{
+                      width: '150px',
+                      height: '150px',
+                      objectFit: 'cover',
+                      border: '4px solid #dee2e6'
+                    }}
+                  />
+                ) : (
+                  <div
+                    className="rounded-circle shadow-sm mb-3 d-flex align-items-center justify-content-center"
+                    style={{
+                      width: '150px',
+                      height: '150px',
+                      border: '4px solid #dee2e6',
+                      backgroundColor: '#f8f9fa',
+                      fontSize: '40px',
+                      fontWeight: 'bold',
+                      color: '#6c757d'
+                    }}
+                  >
+                    {profile.name?.charAt(0).toUpperCase()}
+                  </div>
+                )}
 
                 <h5 className="fw-bold mb-1">{profile.name}</h5>
                 <p className="text-muted small mb-2">{profile.email}</p>
@@ -137,15 +191,16 @@ function EmployeeDashboard() {
               </div>
 
               <div className="col-lg-9 ps-5">
-
                 <div className="d-flex justify-content-between align-items-center mb-4">
                   <h5 className="fw-semibold mb-0">Professional Information</h5>
-                  <button
-                    className="btn btn-primary btn-sm"
-                    onClick={() => setIsEditing(true)}
-                  >
-                    Edit Profile
-                  </button>
+               <button
+  className="btn btn-sm p-0 border-0 bg-transparent"
+  onClick={() => setIsEditing(true)}
+  title="Edit Profile"
+>
+  <i className="bi bi-pencil-square text-dark fs-5"></i>
+</button>
+
                 </div>
 
                 <hr />
@@ -182,13 +237,52 @@ function EmployeeDashboard() {
                     </div>
                   </div>
                 </div>
-
               </div>
-
             </div>
           ) : (
             <>
               <h5 className="fw-semibold mb-4">Edit Profile</h5>
+
+              <div className="row mb-4 text-center">
+                <div className="col-md-12">
+
+                  {profile.photo && (
+                    <img
+                      src={`data:image/*;base64,${profile.photo}`}
+                      alt="Profile"
+                      className="rounded-circle shadow-sm mb-3"
+                      style={{
+                        width: '120px',
+                        height: '120px',
+                        objectFit: 'cover',
+                        border: '4px solid #dee2e6'
+                      }}
+                    />
+                  )}
+
+                  <input
+                    type="file"
+                    
+                    className="form-control mb-2"
+                    onChange={handlePhotoChange}
+                  />
+                  
+                  <button
+                    className="btn btn-primary btn-sm me-2"
+                    onClick={handlePhotoUpload}
+                  >
+                    Upload Photo
+                  </button>
+
+                  <button
+                    className="btn btn-outline-danger btn-sm"
+                    onClick={handleRemovePhoto}
+                  >
+                    Remove Photo
+                  </button>
+
+                </div>
+              </div>
 
               <div className="row">
                 <div className="col-md-6 mb-4">
@@ -212,9 +306,7 @@ function EmployeeDashboard() {
                 </div>
 
                 <div className="col-md-6 mb-4">
-                  <label className="form-label">
-                    Skillset (comma separated)
-                  </label>
+                  <label className="form-label">Skillset</label>
                   <input
                     className="form-control"
                     name="skillset"
@@ -250,20 +342,13 @@ function EmployeeDashboard() {
               </div>
             </>
           )}
-
         </div>
       </div>
 
-      {/* PROFESSIONAL TOP RIGHT TOAST */}
       {showToast && (
         <div className="position-fixed top-0 end-0 p-4" style={{ zIndex: 9999 }}>
-          <div
-            className={`toast show shadow-lg border-0`}
-            style={{ minWidth: '360px' }}
-          >
-            <div
-              className={`toast-header text-white bg-${toastType}`}
-            >
+          <div className="toast show shadow-lg border-0" style={{ minWidth: '360px' }}>
+            <div className={`toast-header text-white bg-${toastType}`}>
               <strong className="me-auto fs-6">Notification</strong>
               <button
                 type="button"
@@ -277,7 +362,6 @@ function EmployeeDashboard() {
           </div>
         </div>
       )}
-
     </div>
   )
 }

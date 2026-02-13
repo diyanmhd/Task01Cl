@@ -19,6 +19,12 @@ function AdminDashboard() {
   const [pageSize] = useState(5)
   const [totalPages, setTotalPages] = useState(1)
 
+  // ✅ NEW STATES
+  const [search, setSearch] = useState('')
+  const [statusFilter, setStatusFilter] = useState('')
+  const [sortBy, setSortBy] = useState('')
+  const [sortOrder, setSortOrder] = useState('ASC')
+
   const [toastMessage, setToastMessage] = useState('')
   const [showToast, setShowToast] = useState(false)
 
@@ -36,20 +42,25 @@ function AdminDashboard() {
     }
 
     fetchEmployees(pageNumber)
-  }, [navigate, pageNumber])
+  }, [navigate, pageNumber, search, statusFilter, sortBy, sortOrder])
 
   const showNotification = (message) => {
     setToastMessage(message)
     setShowToast(true)
-
-    setTimeout(() => {
-      setShowToast(false)
-    }, 3500)
+    setTimeout(() => setShowToast(false), 3500)
   }
 
   const fetchEmployees = async (page) => {
     try {
-      const res = await getAllEmployees(page, pageSize)
+      const res = await getAllEmployees(
+        page,
+        pageSize,
+        search,
+        statusFilter,
+        sortBy,
+        sortOrder
+      )
+
       setEmployees(res.data.items)
       const total = res.data.totalCount
       setTotalPages(Math.ceil(total / pageSize))
@@ -57,6 +68,15 @@ function AdminDashboard() {
       showNotification('Failed to load employees')
     } finally {
       setLoading(false)
+    }
+  }
+
+  const handleSort = (column) => {
+    if (sortBy === column) {
+      setSortOrder(sortOrder === 'ASC' ? 'DESC' : 'ASC')
+    } else {
+      setSortBy(column)
+      setSortOrder('ASC')
     }
   }
 
@@ -115,35 +135,70 @@ function AdminDashboard() {
 
   return (
     <div className="container-fluid px-4 py-4 bg-light min-vh-100">
-
       <div className="card shadow-sm border-0 rounded-3">
 
-        {/* HEADER */}
         <div className="card-header bg-dark text-white d-flex justify-content-between align-items-center">
           <h4 className="mb-0">Admin Dashboard</h4>
-          <button
-            className="btn btn-outline-light btn-sm"
-            onClick={handleLogout}
-          >
+          <button className="btn btn-outline-light btn-sm" onClick={handleLogout}>
             Logout
           </button>
         </div>
 
         <div className="card-body p-4">
 
+          {/* 🔎 SEARCH + FILTER */}
+          <div className="row mb-3">
+            <div className="col-md-6">
+              <input
+                type="text"
+                className="form-control"
+                placeholder="Search employees..."
+                value={search}
+                onChange={(e) => {
+                  setPageNumber(1)
+                  setSearch(e.target.value)
+                }}
+              />
+            </div>
+
+            <div className="col-md-3">
+              <select
+                className="form-select"
+                value={statusFilter}
+                onChange={(e) => {
+                  setPageNumber(1)
+                  setStatusFilter(e.target.value)
+                }}
+              >
+                <option value="">All Status</option>
+                <option value="Active">Active</option>
+                <option value="Inactive">Inactive</option>
+              </select>
+            </div>
+          </div>
+
           {/* TABLE */}
           <div className="table-responsive">
             <table className="table table-hover align-middle">
               <thead className="table-light">
                 <tr>
-                  <th>Name</th>
-                  <th>Email</th>
-                  <th>Department</th>
-                  <th>Designation</th>
+                  <th style={{cursor:'pointer'}} onClick={() => handleSort('Name')}>
+                    Name {sortBy === 'Name' ? (sortOrder === 'ASC' ? '▲' : '▼') : ''}
+                  </th>
+                  <th style={{cursor:'pointer'}} onClick={() => handleSort('Email')}>
+                    Email {sortBy === 'Email' ? (sortOrder === 'ASC' ? '▲' : '▼') : ''}
+                  </th>
+                  <th style={{cursor:'pointer'}} onClick={() => handleSort('Department')}>
+                    Department {sortBy === 'Department' ? (sortOrder === 'ASC' ? '▲' : '▼') : ''}
+                  </th>
+                  <th style={{cursor:'pointer'}} onClick={() => handleSort('Designation')}>
+                    Designation {sortBy === 'Designation' ? (sortOrder === 'ASC' ? '▲' : '▼') : ''}
+                  </th>
                   <th>Status</th>
                   <th className="text-end">Actions</th>
                 </tr>
               </thead>
+
               <tbody>
                 {employees.map(emp => (
                   <tr key={emp.id}>
@@ -151,7 +206,6 @@ function AdminDashboard() {
                     <td>{emp.email}</td>
                     <td>{emp.department}</td>
                     <td>{emp.designation}</td>
-
                     <td>
                       <div className="d-flex align-items-center gap-2">
                         <div className="form-check form-switch m-0">
@@ -162,26 +216,21 @@ function AdminDashboard() {
                             onChange={() => toggleStatus(emp)}
                           />
                         </div>
-                        <span
-                          className={`badge ${
-                            emp.status === 'Active'
-                              ? 'bg-success'
-                              : 'bg-danger'
-                          }`}
-                        >
+                        <span className={`badge ${emp.status === 'Active' ? 'bg-success' : 'bg-danger'}`}>
                           {emp.status}
                         </span>
                       </div>
                     </td>
+<td className="text-end">
+  <button
+    className="btn btn-sm p-0 border-0 bg-transparent"
+    onClick={() => handleEdit(emp)}
+    title="Edit"
+  >
+    <i className="bi bi-pencil-square text-dark fs-5"></i>
+  </button>
+</td>
 
-                    <td className="text-end">
-                      <button
-                        className="btn btn-sm btn-primary"
-                        onClick={() => handleEdit(emp)}
-                      >
-                        Edit
-                      </button>
-                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -194,9 +243,7 @@ function AdminDashboard() {
               {Array.from({ length: totalPages }, (_, index) => (
                 <li
                   key={index + 1}
-                  className={`page-item ${
-                    pageNumber === index + 1 ? 'active' : ''
-                  }`}
+                  className={`page-item ${pageNumber === index + 1 ? 'active' : ''}`}
                 >
                   <button
                     className="page-link"
@@ -209,14 +256,12 @@ function AdminDashboard() {
             </ul>
           </nav>
 
-          {/* EDIT SECTION (FIXED) */}
+          {/* EDIT SECTION */}
           {selectedEmployee && (
             <>
               <hr className="my-4" />
-
               <div className="card shadow-sm border-0 p-4 bg-white">
                 <h5 className="fw-semibold mb-4">Edit Employee</h5>
-
                 <div className="row">
                   <div className="col-md-4 mb-3">
                     <label className="form-label">Department</label>
@@ -227,7 +272,6 @@ function AdminDashboard() {
                       onChange={handleChange}
                     />
                   </div>
-
                   <div className="col-md-4 mb-3">
                     <label className="form-label">Designation</label>
                     <input
@@ -237,7 +281,6 @@ function AdminDashboard() {
                       onChange={handleChange}
                     />
                   </div>
-
                   <div className="col-md-4 mb-3">
                     <label className="form-label">Status</label>
                     <select
@@ -253,10 +296,7 @@ function AdminDashboard() {
                 </div>
 
                 <div className="text-end mt-3">
-                  <button
-                    className="btn btn-success me-2"
-                    onClick={handleUpdate}
-                  >
+                  <button className="btn btn-success me-2" onClick={handleUpdate}>
                     Save Changes
                   </button>
                   <button
@@ -273,13 +313,10 @@ function AdminDashboard() {
         </div>
       </div>
 
-      {/* PROFESSIONAL LARGE TOAST */}
+      {/* TOAST */}
       {showToast && (
         <div className="position-fixed top-0 end-0 p-4" style={{ zIndex: 9999 }}>
-          <div
-            className="toast show shadow-lg border-0"
-            style={{ minWidth: '320px' }}
-          >
+          <div className="toast show shadow-lg border-0" style={{ minWidth: '320px' }}>
             <div className="toast-header bg-primary text-white">
               <strong className="me-auto fs-6">Notification</strong>
               <button
@@ -294,7 +331,6 @@ function AdminDashboard() {
           </div>
         </div>
       )}
-
     </div>
   )
 }

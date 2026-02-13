@@ -108,6 +108,8 @@ function Register() {
                 )}
 
                 <form onSubmit={handleSubmit}>
+                <label className="form-label fw-semibold">Profile</label>
+
                   <div className="row g-3">
 
                     {/* IMAGE (Only show if selected) */}
