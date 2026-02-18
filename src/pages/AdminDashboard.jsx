@@ -264,31 +264,43 @@ function AdminDashboard() {
                 <h5 className="fw-semibold mb-4">Edit Employee</h5>
                 <div className="row">
                   <div className="col-md-4 mb-3">
-                    <label className="form-label">Department</label>
-                    <input
-                      className="form-control"
-                      name="department"
-                      value={formData.department}
-                      onChange={handleChange}
-                    />
+<label htmlFor="admin-department" className="form-label">
+  Department
+</label>
+<input
+  id="admin-department"
+  className="form-control"
+  name="department"
+  value={formData.department}
+  onChange={handleChange}
+/>
+
                   </div>
                   <div className="col-md-4 mb-3">
-                    <label className="form-label">Designation</label>
-                    <input
-                      className="form-control"
-                      name="designation"
-                      value={formData.designation}
-                      onChange={handleChange}
-                    />
+<label htmlFor="admin-designation" className="form-label">
+  Designation
+</label>
+<input
+  id="admin-designation"
+  className="form-control"
+  name="designation"
+  value={formData.designation}
+  onChange={handleChange}
+/>
+
                   </div>
                   <div className="col-md-4 mb-3">
-                    <label className="form-label">Status</label>
-                    <select
-                      className="form-select"
-                      name="status"
-                      value={formData.status}
-                      onChange={handleChange}
-                    >
+<label htmlFor="admin-status" className="form-label">
+  Status
+</label>
+<select
+  id="admin-status"
+  className="form-select"
+  name="status"
+  value={formData.status}
+  onChange={handleChange}
+>
+
                       <option value="Active">Active</option>
                       <option value="Inactive">Inactive</option>
                     </select>

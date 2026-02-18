@@ -1,8 +1,19 @@
 export const getLoggedInUser = () => {
-  const user = localStorage.getItem('user')
-  return user ? JSON.parse(user) : null
+  const token = localStorage.getItem('token')
+  const role = localStorage.getItem('role')
+  const userId = localStorage.getItem('userId')
+  const name = localStorage.getItem('name')
+
+  if (!token || !role || !userId) return null
+
+  return {
+    token,
+    role,
+    userId,
+    name
+  }
 }
 
 export const logout = () => {
-  localStorage.removeItem('user')
+  localStorage.clear()
 }

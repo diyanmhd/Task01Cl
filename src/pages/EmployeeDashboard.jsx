@@ -33,7 +33,8 @@ function EmployeeDashboard() {
       return
     }
 
-    fetchProfile(user.userId)
+   fetchProfile()
+
   }, [navigate])
 
   const showNotification = (message, type = 'success') => {
@@ -46,23 +47,25 @@ function EmployeeDashboard() {
     }, 3500)
   }
 
-  const fetchProfile = async (userId) => {
-    try {
-      const res = await getEmployeeProfile(userId)
-      setProfile(res.data)
+const fetchProfile = async () => {
+  try {
+    const res = await getEmployeeProfile()  // 🔐 no userId needed
+    setProfile(res.data)
 
-      setFormData({
-        designation: res.data.designation || '',
-        department: res.data.department || '',
-        address: res.data.address || '',
-        skillset: res.data.skillset || ''
-      })
-    } catch {
-      showNotification('Failed to load profile', 'danger')
-    } finally {
-      setLoading(false)
-    }
+    setFormData({
+      designation: res.data.designation || '',
+      department: res.data.department || '',
+      address: res.data.address || '',
+      skillset: res.data.skillset || ''
+    })
+
+  } catch {
+    showNotification('Failed to load profile', 'danger')
+  } finally {
+    setLoading(false)
   }
+}
+
 
   const handleChange = (e) => {
     const { name, value } = e.target
@@ -286,43 +289,59 @@ function EmployeeDashboard() {
 
               <div className="row">
                 <div className="col-md-6 mb-4">
-                  <label className="form-label">Department</label>
-                  <input
-                    className="form-control"
-                    name="department"
-                    value={formData.department}
-                    onChange={handleChange}
-                  />
+                  <label htmlFor="department" className="form-label">
+  Department
+</label>
+<input
+  id="department"
+  className="form-control"
+  name="department"
+  value={formData.department}
+  onChange={handleChange}
+/>
+
                 </div>
 
                 <div className="col-md-6 mb-4">
-                  <label className="form-label">Designation</label>
-                  <input
-                    className="form-control"
-                    name="designation"
-                    value={formData.designation}
-                    onChange={handleChange}
-                  />
+<label htmlFor="designation" className="form-label">
+  Designation
+</label>
+<input
+  id="designation"
+  className="form-control"
+  name="designation"
+  value={formData.designation}
+  onChange={handleChange}
+/>
+
                 </div>
 
                 <div className="col-md-6 mb-4">
-                  <label className="form-label">Skillset</label>
-                  <input
-                    className="form-control"
-                    name="skillset"
-                    value={formData.skillset}
-                    onChange={handleChange}
-                  />
+ <label htmlFor="skillset" className="form-label">
+  Skillset
+</label>
+<input
+  id="skillset"
+  className="form-control"
+  name="skillset"
+  value={formData.skillset}
+  onChange={handleChange}
+/>
+
                 </div>
 
                 <div className="col-md-12 mb-4">
-                  <label className="form-label">Address</label>
-                  <input
-                    className="form-control"
-                    name="address"
-                    value={formData.address}
-                    onChange={handleChange}
-                  />
+  <label htmlFor="address" className="form-label">
+  Address
+</label>
+<input
+  id="address"
+  className="form-control"
+  name="address"
+  value={formData.address}
+  onChange={handleChange}
+/>
+
                 </div>
               </div>
 

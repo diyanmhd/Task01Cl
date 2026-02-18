@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import axios from 'axios'
+import { loginUser } from '../services/authService'
 
 function Login() {
   const [username, setUsername] = useState('')
@@ -12,32 +12,21 @@ function Login() {
     e.preventDefault()
     setError('')
 
-    const loginData = {
-      username: username,
-      password: password
-    }
-
     try {
-      const response = await axios.post(
-        'https://localhost:7110/api/auth/login',
-        loginData
-      )
+      const data = await loginUser({
+        username,
+        password
+      })
 
-      // Save user in localStorage
-      localStorage.setItem('user', JSON.stringify(response.data))
-
-      // ✅ Fix: Use Role (capital R) from backend
-      if (response.data.Role?.toLowerCase() === 'admin') {
+      // 🔐 Redirect based on role
+      if (data.role?.toLowerCase() === 'admin') {
         navigate('/admin')
       } else {
         navigate('/employee')
       }
 
     } catch (err) {
-      console.error(err)
-
-      // ✅ Show backend message properly
-      if (err.response && err.response.data) {
+      if (err.response?.data) {
         setError(err.response.data)
       } else {
         setError('Login failed. Please try again.')
@@ -46,18 +35,14 @@ function Login() {
   }
 
   return (
-    <div
-      className="min-vh-100 d-flex align-items-center justify-content-center"
-      style={{
-        background: 'linear-gradient(135deg, #1e293b, #0f172a)'
-      }}
-    >
+    <div className="min-vh-100 d-flex align-items-center justify-content-center"
+      style={{ background: 'linear-gradient(135deg, #1e293b, #0f172a)' }}>
+
       <div className="container">
         <div className="row justify-content-center">
           <div className="col-lg-4 col-md-6">
 
             <div className="card shadow-lg border-0 rounded-4">
-
               <div className="card-body p-5">
 
                 <div className="text-center mb-4">
@@ -75,33 +60,41 @@ function Login() {
 
                 <form onSubmit={handleSubmit}>
 
-                  <div className="mb-4">
-                    <label className="form-label fw-semibold">
-                      Username
-                    </label>
-                    <input
-                      type="text"
-                      className="form-control form-control-lg"
-                      placeholder="Enter your username"
-                      value={username}
-                      onChange={(e) => setUsername(e.target.value)}
-                      required
-                    />
-                  </div>
+<div className="mb-4">
+  <label
+    htmlFor="username"
+    className="form-label fw-semibold"
+  >
+    Username
+  </label>
+  <input
+    id="username"
+    type="text"
+    className="form-control form-control-lg"
+    value={username}
+    onChange={(e) => setUsername(e.target.value)}
+    required
+  />
+</div>
 
-                  <div className="mb-4">
-                    <label className="form-label fw-semibold">
-                      Password
-                    </label>
-                    <input
-                      type="password"
-                      className="form-control form-control-lg"
-                      placeholder="Enter your password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      required
-                    />
-                  </div>
+
+ <div className="mb-4">
+  <label
+    htmlFor="password"
+    className="form-label fw-semibold"
+  >
+    Password
+  </label>
+  <input
+    id="password"
+    type="password"
+    className="form-control form-control-lg"
+    value={password}
+    onChange={(e) => setPassword(e.target.value)}
+    required
+  />
+</div>
+
 
                   <button
                     type="submit"
@@ -116,16 +109,12 @@ function Login() {
                   <span className="text-muted small">
                     Don’t have an account?
                   </span>{' '}
-                  <Link
-                    to="/register"
-                    className="fw-semibold text-decoration-none"
-                  >
+                  <Link to="/register" className="fw-semibold text-decoration-none">
                     Register
                   </Link>
                 </div>
 
               </div>
-
             </div>
 
             <div className="text-center text-light small mt-4">

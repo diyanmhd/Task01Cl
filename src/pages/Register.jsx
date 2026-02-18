@@ -139,53 +139,67 @@ function Register() {
                     </div>
 
                     <div className="col-md-6">
-                      <label className="form-label fw-semibold">Name</label>
-                      <input
-                        className="form-control"
-                        value={formData.name}
-                        onChange={(e) =>
-                          setFormData({ ...formData, name: e.target.value })
-                        }
-                        required
-                      />
+<label htmlFor="name" className="form-label fw-semibold">Name</label>
+<input
+  id="name"
+  className="form-control"
+  value={formData.name}
+  onChange={(e) =>
+    setFormData({ ...formData, name: e.target.value })
+  }
+  required
+/>
+
                     </div>
 
                     <div className="col-md-6">
-                      <label className="form-label fw-semibold">Username</label>
-                      <input
-                        className="form-control"
-                        value={formData.username}
-                        onChange={(e) =>
-                          setFormData({ ...formData, username: e.target.value })
-                        }
-                        required
-                      />
+<label htmlFor="username" className="form-label fw-semibold">
+  Username
+</label>
+<input
+  id="username"
+  className="form-control"
+  value={formData.username}
+  onChange={(e) =>
+    setFormData({ ...formData, username: e.target.value })
+  }
+  required
+/>
+
                     </div>
 
                     <div className="col-md-6">
-                      <label className="form-label fw-semibold">Email</label>
-                      <input
-                        type="email"
-                        className="form-control"
-                        value={formData.email}
-                        onChange={(e) =>
-                          setFormData({ ...formData, email: e.target.value })
-                        }
-                        required
-                      />
+  <label htmlFor="email" className="form-label fw-semibold">
+  Email
+</label>
+<input
+  id="email"
+  type="email"
+  className="form-control"
+  value={formData.email}
+  onChange={(e) =>
+    setFormData({ ...formData, email: e.target.value })
+  }
+  required
+/>
+
                     </div>
 
                     <div className="col-md-6">
-                      <label className="form-label fw-semibold">Password</label>
-                      <input
-                        type="password"
-                        className="form-control"
-                        value={formData.password}
-                        onChange={(e) =>
-                          setFormData({ ...formData, password: e.target.value })
-                        }
-                        required
-                      />
+   <label htmlFor="password" className="form-label fw-semibold">
+  Password
+</label>
+<input
+  id="password"
+  type="password"
+  className="form-control"
+  value={formData.password}
+  onChange={(e) =>
+    setFormData({ ...formData, password: e.target.value })
+  }
+  required
+/>
+
                     </div>
 
                     <div className="col-md-6">
